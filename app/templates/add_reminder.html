@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<h1>{{ _('Add Reminder') }}</h1>
+
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    
+        <p>
+            <p>Name</p>
+            {{ form.name }}<br>
+            {% for error in form.name.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            <p>Every</p>
+            {{ form.interval_number }}<br>
+            {% for error in form.interval_number.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.interval_period }} <br>
+            {% for error in form.interval_period.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            
+        </p>
+        
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %} 
