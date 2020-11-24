@@ -51,6 +51,8 @@ def error_checker(FlaskForm, field):
 
 class AddReminder(FlaskForm):
     name = StringField(_l("name"), validators=[DataRequired()])
-    interval_number = StringField('interval number', validators=[DataRequired(), error_checker])
-    interval_period = RadioField('interval period', choices = [("m", "months"), ("3", "weeks"), ("1", "days"), ("2", "hours")])
+    interval_number = IntegerField('interval number', validators=[DataRequired(), error_checker])
+    interval_period = RadioField('interval period', choices = [("0", "test"), ("1", "hour(s)"), ("2", "day(s)"), ("3", "week(s)"), ("4", "month(s)")])
+    post = TextAreaField(_l('Say something'), validators=[DataRequired()])
     submit = SubmitField(_l('Add Reminder'))
+    
