@@ -13,7 +13,7 @@ from app.main.forms import MessageForm
 from app.models import Message, Notification
 import schedule
 import time
-from app.main.my_schedule import my_schedule_f
+from app.main.my_schedule import my_schedule_f, thread_caller
 
 
 @bp.before_app_request
@@ -207,10 +207,25 @@ def user_popup(username):
 @bp.route("/add_reminder", methods=['GET', 'POST'])
 @login_required
 def add_reminder():
+    
     form = AddReminder()
+
     if form.validate_on_submit():
+
+        testInfo = form.post.data
+        language = guess_language(form.post.data)
+        if language == 'UNKNOWN' or len(language) > 5:
+            language = ''
+        post = Post(body=testInfo, author=current_user,
+                    language=language)
+        db.session.add(post)
+        db.session.commit()
+
         name = form.name.data
         interval_number = form.interval_number.data
         interval_period = form.interval_period.data
-        reminder = my_schedule_f(name, interval_number, interval_period)
+        reminder = thread_caller(name, interval_number, interval_period)
+        flash(_('Reminder added'))
+        return redirect(url_for('main.add_reminder'))
+        
     return render_template('add_reminder.html', form=form)
