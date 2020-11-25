@@ -212,19 +212,12 @@ def add_reminder():
 
     if form.validate_on_submit():
 
-        testInfo = form.post.data
-        language = guess_language(form.post.data)
-        if language == 'UNKNOWN' or len(language) > 5:
-            language = ''
-        post = Post(body=testInfo, author=current_user,
-                    language=language)
-        db.session.add(post)
-        db.session.commit()
-
         name = form.name.data
         interval_number = form.interval_number.data
         interval_period = form.interval_period.data
-        reminder = thread_caller(name, interval_number, interval_period)
+        testInfo = form.post.data
+        current_user_test = current_user
+        reminder = thread_caller(name, interval_number, interval_period, testInfo, current_user_test)
         flash(_('Reminder added'))
         return redirect(url_for('main.add_reminder'))
         

@@ -4,30 +4,36 @@ import schedule
 import time
 from flask import flash
 from app.models import User, Post
-from flask_login import current_user
+#from flask_login import current_user
+#from flask import g, current_app
+#from guess_language import guess_language
+from app import db
+from app import create_app
 
-
-def job(name ):
-    print("recall contact", name)
+""" 
+    One of the most important things into this code is the conexion to the database inside the thread. For make that possible i worked with context. All can be understand with:
+    https://flask-sqlalchemy.palletsprojects.com/en/2.x/contexts/ 
+"""
+app = create_app()
+def job(testInfo, name, current_user):
     
-    """post = Post(body=posti, author=current_user, language='')
-    db.session.add(post)
-    db.session.commit()"""
+    print("recall contact fulanito", name)
+    post = Post(body=testInfo, user_id=current_user, language = '')
+    with app.app_context():
+        db.session.add(post)
+        db.session.commit()
     
-
-def my_schedule_f(name, number, period):
+def my_schedule_f(name, number, period, testInfo, current_user):
     
     """
-    0 is to work with minutes and only for tests
-    1 is to work with hours
-    2 is to work with days
-    3 is to work with weeks. But schedule don't have a option for this case so i use the one for "days" multiplicating the value of number for 7 (as there's 7 days in a week)
-    4 is to work with months. We have the same situation that "3/weeks" and we apply the same logic to fixed, in this case we multiplicated number for 30 ( as there's 30 days in a month) 
+        0 is to work with minutes and only for tests
+        1 is to work with hours
+        2 is to work with days
+        3 is to work with weeks. But schedule don't have a option for this case so i use the one for "days" multiplicating the value of number for 7 (as there's 7 days in a week)
+        4 is to work with months. We have the same situation that "3/weeks" and we apply the same logic to fixed, in this case we multiplicated number for 30 ( as there's 30 days in a month) 
 
-    A example of how to "read" the instruction: "every x number of days do the next task/job"
-    """
-    print("into the fuction")
-
+        A example of how to "read" the instruction: "every x number of days do the job"
+    """    
     if period == "1":
         schedule.every(number).hours.do(job, name=name)
     elif period == "2":
@@ -40,29 +46,21 @@ def my_schedule_f(name, number, period):
         number = number * 30
         schedule.every(number).day.do(job, name=name)
     elif period == "0":
-        print("into the elif")
-        schedule.every(0.1).minutes.do(job, name=name)
-        print("after the elif")
+        schedule.every(0.1).minutes.do(job, testInfo=testInfo, name=name, current_user=current_user)
     while True:
         schedule.run_pending()
         time.sleep(1)
 
-def thread_caller(name, number, period):
+def thread_caller(name, number, period, testInfo, current_user):
 
     """ 
-    The prints in this code are just for testing reasons and don't clash with the final user experience:
-
-    Inside this function we have a thread, that make my_shedule_f work without forcing the rest of the web to stop.
-    I put the thread inside a function so I could called from routes.py after it recieve the data from the form in add_reminder
-
-    The t1.join() is commented because it was blocking a (single) message flash() and it looks like the absent of t1.join() don't affect anything negatively. I let it here just in case I need it in the future or in
-    case I realize is actuqlly need it
-
+        Inside this function we have a thread, that make my_shedule_f work without forcing the rest of the web to stop.
+        I put the thread inside a function so I could called from routes.py after it recieve the data from the form in add_reminder
     """
-
-    print("the thread was activated")
-    t1=threading.Thread(target=my_schedule_f, args=(name, number,period))
+    current_user = current_user.id
+    t1=threading.Thread(target=my_schedule_f, args=(name, number, period, testInfo, current_user))
     t1.start()
-    """t1.join()"""
     
-    print("the thread ended")  
+
+    
+    
