@@ -9,10 +9,13 @@ from app.models import User, Post
 #from guess_language import guess_language
 from app import db
 from app import create_app
+from app.email import send_email
 
 """ 
     One of the most important things into this code is the conexion to the database inside the thread. For make that possible i worked with context. All can be understand with:
     https://flask-sqlalchemy.palletsprojects.com/en/2.x/contexts/ 
+
+    To understand the email configuration (and testing) I recommend read: https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-x-email-support/
 """
 app = create_app()
 def job(testInfo, name, current_user):
@@ -20,8 +23,10 @@ def job(testInfo, name, current_user):
     print("recall contact fulanito", name)
     post = Post(body=testInfo, user_id=current_user, language = '')
     with app.app_context():
+        send_email("test reminder", sender=app.config['ADMINS'][0], recipients=["the email that is going to get the reminders"], text_body="testing")
         db.session.add(post)
         db.session.commit()
+        
     
 def my_schedule_f(name, number, period, testInfo, current_user):
     
